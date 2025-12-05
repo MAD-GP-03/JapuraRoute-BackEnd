@@ -10,6 +10,27 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 
+
+enum class Department {
+    IT,
+    ET,
+    BST
+}
+
+enum class FocusArea {
+    COMMON,
+    SOFTWARE,
+    NETWORKING,
+    MULTIMEDIA
+}
+
+enum class UniYear{
+    FIRST_YEAR,
+    SECOND_YEAR,
+    THIRD_YEAR,
+    FOURTH_YEAR
+}
+
 @Entity
 @Table(name = "user_details")
 @EntityListeners(AuditingEntityListener::class)
@@ -24,8 +45,25 @@ class UserDetails(
     var address: String? = null,
 
     @Column(name = "date_of_birth")
-    var dateOfBirth: LocalDate? = null
-) {
+    var dateOfBirth: LocalDate? = null,
+
+    @Column(name = "uni_year")
+    var uni_year: UniYear? = null,
+
+    @Column(name="reg_number")
+    var reg_number: String? = null,
+
+    @Column(name="department")
+    var department: Department? = null,
+
+    @Column(name = "focus_area")
+    var focus_area: FocusArea? = FocusArea.COMMON,
+
+    @Column(name="nic")
+    var nic: String? = null,
+
+
+    ) {
     constructor() : this("")
 
     @Id

@@ -4,6 +4,7 @@ import com.example.japuraroute.module.user.repository.UserRepository
 import com.example.japuraroute.common.util.JwtAuthenticationFilter
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.context.annotation.Lazy
 import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.authentication.AuthenticationProvider
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider
@@ -57,7 +58,7 @@ class SecurityConfig(
     @Bean
     fun securityFilterChain(
         http: HttpSecurity,
-        jwtAuthFilter: JwtAuthenticationFilter,
+        @Lazy jwtAuthFilter: JwtAuthenticationFilter,
         authProvider: AuthenticationProvider
     ): SecurityFilterChain {
         http

@@ -23,11 +23,7 @@ class AuthService(
 
         val user = User(
             username = request.username,
-            role = when (request.role.uppercase()) {
-                "STUDENT" -> UserRole.STUDENT
-                "GUEST" -> UserRole.GUEST
-                else -> UserRole.STUDENT
-            },
+            role = request.role,
             email = request.email,
             passwordHash = passwordEncoder.encode(request.password)!!
         )
@@ -35,7 +31,11 @@ class AuthService(
         val userDetails = UserDetails(
             fullName = request.fullName,
             phoneNumber = request.phoneNumber,
-            address = request.address
+            address = request.address,
+            uni_year = request.uni_year,
+            reg_number = request.reg_number,
+            focus_area = request.focus_area,
+            nic = request.nic
         )
         userDetails.user = user
         user.details = userDetails

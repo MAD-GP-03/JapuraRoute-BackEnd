@@ -1,6 +1,10 @@
 package com.example.japuraroute.module.auth.dto
 
 import jakarta.validation.constraints.*
+import com.example.japuraroute.module.user.model.UserRole
+import com.example.japuraroute.module.user.model.Department
+import com.example.japuraroute.module.user.model.FocusArea
+import com.example.japuraroute.module.user.model.UniYear
 
 data class RegisterRequest(
     @field:NotBlank(message = "Username is required")
@@ -34,9 +38,42 @@ data class RegisterRequest(
     val address: String,
 
     @field:NotBlank(message = "Role is required")
-    @field:Pattern(regexp = "^(STUDENT|ADMIN|GUEST)$", message = "Role must be STUDENT, ADMIN, or GUEST")
-    val role: String
-)
+    val role: UserRole,
+
+    val uni_year: UniYear?,
+
+    @field:Size(min = 3, max = 20, message = "Registration Number must be between 3 and 20 characters")
+    val reg_number: String?,
+
+    val department: Department?,
+
+    val focus_area: FocusArea?,
+
+    @field:NotBlank(message = "NIC is required")
+    @field:Size(min = 5, max = 20, message = "NIC Number must be between 3 and 20 characters")
+    val nic: String
+
+){
+    @AssertTrue(message = "Uni year is required for STUDENT role")
+    fun isUniYearValid(): Boolean {
+        return !(role == UserRole.STUDENT && uni_year == null)
+    }
+
+    @AssertTrue(message = "Registration number is required for STUDENT role")
+    fun validateRegNumber(): Boolean {
+        return !(role == UserRole.STUDENT && reg_number.isNullOrBlank())
+    }
+
+    @AssertTrue(message = "Department is required for STUDENT role")
+    fun validateDepartment(): Boolean {
+        return !(role == UserRole.STUDENT && department == null)
+    }
+
+    @AssertTrue(message = "Focus area is required for STUDENT role")
+    fun validateFocusArea(): Boolean {
+        return !(role == UserRole.STUDENT && focus_area == null)
+    }
+}
 
 data class LoginRequest(
     @field:NotBlank(message = "Email is required")
