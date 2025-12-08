@@ -1,0 +1,137 @@
+name: Deploy to DigitalOcean
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+env:
+  IMAGE_NAME: japuraroute
+  IMAGE_TAG: latest
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: Cache Gradle packages
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: ${{ runner.os }}-gradle-
+
+      - name: Make gradlew executable
+        run: chmod +x ./gradlew
+
+      - name: Build with Gradle
+        run: ./gradlew clean build -x test --no-daemon
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Docker image
+        run: |
+          docker build -t ${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }} .
+          docker save ${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }} | gzip > app.tar.gz
+
+      - name: Copy Docker image to server
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.DROPLET_HOST }}
+          username: ${{ secrets.DROPLET_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          source: "app.tar.gz"
+          target: "/opt/japuraroute"
+
+      - name: Copy compose file to server
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.DROPLET_HOST }}
+          username: ${{ secrets.DROPLET_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          source: "compose.prod.yml"
+          target: "/opt/japuraroute"
+
+      - name: Create/Update .env file
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.DROPLET_HOST }}
+          username: ${{ secrets.DROPLET_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            cd /opt/japuraroute
+            cat > .env <<EOF
+            JDBC_URL=${{ secrets.JDBC_URL }}
+            DB_USER=${{ secrets.DB_USER }}
+            DB_PASS=${{ secrets.DB_PASS }}
+            JWT_SECRET=${{ secrets.JWT_SECRET }}
+            SPRING_PROFILES_ACTIVE=prod
+            EOF
+            chmod 600 .env
+            ls -la .env
+
+      - name: Deploy application
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.DROPLET_HOST }}
+          username: ${{ secrets.DROPLET_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            cd /opt/japuraroute
+            
+            echo "Loading Docker image..."
+            docker load < app.tar.gz
+            
+            echo "Stopping existing containers..."
+            docker compose -f compose.prod.yml down || true
+            
+            echo "Starting new containers..."
+            docker compose -f compose.prod.yml up -d
+            
+            echo "Cleaning up..."
+            rm -f app.tar.gz
+            docker image prune -f
+            
+            echo "Waiting for app to start..."
+            sleep 15
+            
+            echo "Checking status..."
+            docker compose -f compose.prod.yml ps
+            docker compose -f compose.prod.yml logs --tail=20 app
+
+      - name: Health check
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.DROPLET_HOST }}
+          username: ${{ secrets.DROPLET_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            echo "Running health check..."
+            max_retries=10
+            retry=0
+            
+            while [ $retry -lt $max_retries ]; do
+              if curl -f http://localhost:8080/actuator/health; then
+                echo "✅ Application is healthy!"
+                exit 0
+              fi
+              echo "⏳ Waiting for application... ($((retry+1))/$max_retries)"
+              sleep 5
+              retry=$((retry+1))
+            done
+            
+            echo "❌ Health check failed!"
+            docker compose -f /opt/japuraroute/compose.prod.yml logs --tail=50 app
+            exit 1
