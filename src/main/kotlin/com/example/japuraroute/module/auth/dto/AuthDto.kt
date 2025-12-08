@@ -37,7 +37,6 @@ data class RegisterRequest(
     @field:Size(min = 5, max = 200, message = "Address must be between 5 and 200 characters")
     val address: String,
 
-    @field:NotBlank(message = "Role is required")
     val role: UserRole,
 
     val uni_year: UniYear?,
