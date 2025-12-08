@@ -4,10 +4,11 @@ import org.junit.jupiter.api.Test
 import org.springframework.boot.test.context.SpringBootTest
 
 @SpringBootTest
-@Import(TestConfig::class)
+class JapuraRouteApplicationTests {
 
     @Test
     fun contextLoads() {
         // Test that the application context loads successfully
     }
+}
 
