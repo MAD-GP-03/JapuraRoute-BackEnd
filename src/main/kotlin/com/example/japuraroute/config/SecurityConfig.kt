@@ -68,6 +68,13 @@ class SecurityConfig(
                     .requestMatchers("/api/auth/**").permitAll() // Open for Login/Register
                     .requestMatchers("/api/health").permitAll() // Health check endpoint
                     .requestMatchers("/error").permitAll() // Error endpoint
+                    // ✅ Allow Actuator endpoints
+                    .requestMatchers(
+                        "/actuator/health/**",
+                        "/actuator/health",
+                        "/actuator/info",
+                        "/actuator/metrics"
+                    ).permitAll()
                     // ✅ Allow Swagger UI and API Docs
                     .requestMatchers(
                         "/v3/api-docs/**",
