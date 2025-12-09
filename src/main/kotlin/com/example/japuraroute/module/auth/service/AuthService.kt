@@ -7,7 +7,6 @@ import com.example.japuraroute.module.user.model.UserDetails
 import com.example.japuraroute.module.user.repository.UserRepository
 import org.springframework.stereotype.Service
 import com.example.japuraroute.common.util.PasswordEncoderCustom
-import com.example.japuraroute.module.user.model.UserRole
 
 
 @Service
@@ -32,9 +31,9 @@ class AuthService(
             fullName = request.fullName,
             phoneNumber = request.phoneNumber,
             address = request.address,
-            uni_year = request.uni_year,
-            reg_number = request.reg_number,
-            focus_area = request.focus_area,
+            uni_year = request.uniYear,
+            reg_number = request.regNumber,
+            focus_area = request.focusArea,
             nic = request.nic
         )
         userDetails.user = user

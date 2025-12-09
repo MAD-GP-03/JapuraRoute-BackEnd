@@ -39,14 +39,14 @@ data class RegisterRequest(
 
     val role: UserRole,
 
-    val uni_year: UniYear?,
+    val uniYear: UniYear?,
 
     @field:Size(min = 3, max = 20, message = "Registration Number must be between 3 and 20 characters")
-    val reg_number: String?,
+    val regNumber: String?,
 
     val department: Department?,
 
-    val focus_area: FocusArea?,
+    val focusArea: FocusArea?,
 
     @field:NotBlank(message = "NIC is required")
     @field:Size(min = 5, max = 20, message = "NIC Number must be between 3 and 20 characters")
@@ -55,12 +55,12 @@ data class RegisterRequest(
 ){
     @AssertTrue(message = "Uni year is required for STUDENT role")
     fun isUniYearValid(): Boolean {
-        return !(role == UserRole.STUDENT && uni_year == null)
+        return !(role == UserRole.STUDENT && uniYear == null)
     }
 
     @AssertTrue(message = "Registration number is required for STUDENT role")
     fun validateRegNumber(): Boolean {
-        return !(role == UserRole.STUDENT && reg_number.isNullOrBlank())
+        return !(role == UserRole.STUDENT && regNumber.isNullOrBlank())
     }
 
     @AssertTrue(message = "Department is required for STUDENT role")
@@ -70,7 +70,7 @@ data class RegisterRequest(
 
     @AssertTrue(message = "Focus area is required for STUDENT role")
     fun validateFocusArea(): Boolean {
-        return !(role == UserRole.STUDENT && focus_area == null)
+        return !(role == UserRole.STUDENT && focusArea == null)
     }
 }
 

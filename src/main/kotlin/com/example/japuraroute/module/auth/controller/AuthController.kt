@@ -20,7 +20,6 @@ import org.springframework.web.bind.annotation.*
 @RestController
 @RequestMapping("/api/auth")
 @Tag(name = "Authentication", description = "Authentication and Registration endpoints")
-@Suppress("SpringJavaInjectionPointsAutowiringInspection")
 class AuthController(
     private val authService: AuthService,
     private val jwtService: JwtService,
@@ -54,6 +53,7 @@ class AuthController(
 
             ResponseEntity.status(HttpStatus.CREATED).body(
                 mapOf(
+                    "status" to true,
                     "message" to "User registered successfully",
                     "token" to token,
                     "user" to mapOf(
@@ -66,7 +66,10 @@ class AuthController(
             )
         } catch (e: IllegalArgumentException) {
             ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
-                mapOf("error" to (e.message ?: "Registration failed"))
+                mapOf(
+                    "status" to false,
+                    "error" to (e.message ?: "Registration failed")
+                )
             )
         }
     }
@@ -102,6 +105,7 @@ class AuthController(
 
             ResponseEntity.ok(
                 mapOf(
+                    "status" to true,
                     "message" to "Login successful",
                     "token" to token,
                     "user" to mapOf(
@@ -114,11 +118,17 @@ class AuthController(
             )
         } catch (e: IllegalArgumentException) {
             ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
-                mapOf("error" to (e.message ?: "Invalid credentials"))
+                mapOf(
+                    "status" to false,
+                    "error" to (e.message ?: "Invalid credentials")
+                )
             )
         } catch (e: Exception) {
             ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
-                mapOf("error" to "Invalid email or password")
+                mapOf(
+                    "status" to false,
+                    "error" to "Invalid email or password"
+                )
             )
         }
     }
