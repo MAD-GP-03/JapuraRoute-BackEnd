@@ -113,7 +113,8 @@ class AuthController(
                         "username" to user.username,
                         "email" to user.email,
                         "role" to user.role,
-                        "uniYear" to user.details?.uni_year
+                        "uniYear" to user.details?.uni_year,
+                        "focusArea" to user.details?.focus_area
                     )
                 )
             )
