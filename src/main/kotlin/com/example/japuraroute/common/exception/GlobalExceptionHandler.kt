@@ -23,7 +23,7 @@ class GlobalExceptionHandler {
 
         val response = mapOf(
             "timestamp" to LocalDateTime.now().toString(),
-            "status" to HttpStatus.BAD_REQUEST.value(),
+            "status" to false,
             "error" to "Validation Failed",
             "message" to "Invalid input data",
             "errors" to errors
@@ -36,7 +36,7 @@ class GlobalExceptionHandler {
     fun handleIllegalArgumentException(ex: IllegalArgumentException): ResponseEntity<Map<String, Any>> {
         val response = mapOf(
             "timestamp" to LocalDateTime.now().toString(),
-            "status" to HttpStatus.BAD_REQUEST.value(),
+            "status" to false,
             "error" to "Bad Request",
             "message" to (ex.message ?: "Invalid request")
         )
@@ -51,7 +51,7 @@ class GlobalExceptionHandler {
 
         val response = mapOf(
             "timestamp" to LocalDateTime.now().toString(),
-            "status" to HttpStatus.INTERNAL_SERVER_ERROR.value(),
+            "status" to false,
             "error" to "Internal Server Error",
             "message" to (ex.message ?: "An unexpected error occurred"),
             "exceptionType" to ex.javaClass.simpleName,
