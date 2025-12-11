@@ -9,6 +9,7 @@ import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.authentication.AuthenticationProvider
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
 import org.springframework.security.config.http.SessionCreationPolicy
@@ -23,6 +24,7 @@ import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity(prePostEnabled = true)
 class SecurityConfig(
     private val userRepository: UserRepository
 ) {
@@ -42,7 +44,7 @@ class SecurityConfig(
             org.springframework.security.core.userdetails.User.builder()
                 .username(user.email)
                 .password(user.passwordHash)
-                .roles("USER") // Simple role for now
+                .roles(user.role.name) // Use actual role from database
                 .build()
         }
     }
