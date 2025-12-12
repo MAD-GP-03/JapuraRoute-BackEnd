@@ -281,7 +281,8 @@ class SemesterGpaService(
         }
 
         // ULTRA-OPTIMIZED: Calculate all statistics in ONE database query
-        // Native query returns List with one element containing Object[] with [count, weightedSum, totalCredits]
+        // Query now calculates per-student CGPA first, then averages them
+        // Returns: [student_count, average_cgpa]
         val queryResult = semesterGpaRepository.calculateBatchStatistics(uniYear.name)
 
         if (queryResult == null || queryResult.isEmpty()) {
@@ -315,9 +316,9 @@ class SemesterGpaService(
             println("DEBUG: statistics[$index] = $value (${value?.let { it::class.simpleName } ?: "null"})")
         }
 
-        // Ensure we have at least 3 elements
-        if (statistics.size < 3) {
-            println("ERROR: Expected 3 values but got ${statistics.size}. Query might have failed or returned unexpected format.")
+        // Ensure we have at least 2 elements (student_count, average_cgpa)
+        if (statistics.size < 2) {
+            println("ERROR: Expected 2 values but got ${statistics.size}. Query might have failed or returned unexpected format.")
             return BatchAverageGpaResponseDTO(
                 uniYear = uniYear.name,
                 totalStudents = totalStudents,
@@ -333,22 +334,10 @@ class SemesterGpaService(
             else -> 0
         }
 
-        val weightedGpaSum = when (val sum = statistics[1]) {
-            is Number -> sum.toDouble()
-            else -> 0.0
-        }
-
-        val totalCreditsSum = when (val credits = statistics[2]) {
-            is Number -> credits.toDouble()
-            else -> 0.0
-        }
-
-        // Calculate batch average GPA: Sum(student_cgpa) / student_count
-        // Where student_cgpa = Sum(semester_gpa * semester_credits) / Sum(semester_credits)
-        val averageGpa = if (totalCreditsSum > 0.0) {
-            (weightedGpaSum / totalCreditsSum).toFloat()
-        } else {
-            0.0f
+        // The query now returns the already-calculated average CGPA
+        val averageGpa = when (val avg = statistics[1]) {
+            is Number -> avg.toFloat()
+            else -> 0.0f
         }
 
         val studentsWithoutGpa = totalStudents - studentsWithGpa

@@ -35,17 +35,22 @@ interface SemesterGpaRepository : JpaRepository<SemesterGpaModel, UUID> {
     fun findByUserIdIn(@Param("userIds") userIds: List<UUID>): List<SemesterGpaModel>
 
     // ULTRA-OPTIMIZED: Calculate batch average GPA statistics in a single database query
-    // Using native query for better control over result mapping
+    // First calculates each student's overall CGPA, then averages across all students
     @Query(
         value = """
             SELECT 
-                COUNT(DISTINCT s.user_id) as student_count,
-                COALESCE(SUM(s.gpa * s.total_credits), 0) as weighted_gpa_sum,
-                COALESCE(SUM(s.total_credits), 0) as total_credits_sum
-            FROM student_semester_gpa s
-            JOIN users u ON s.user_id = u.id
-            JOIN user_details ud ON ud.user_id = u.id
-            WHERE CAST(ud.uni_year AS VARCHAR) = :uniYear
+                COUNT(DISTINCT student_cgpa.user_id) as student_count,
+                COALESCE(AVG(student_cgpa.cgpa), 0) as average_cgpa
+            FROM (
+                SELECT 
+                    s.user_id,
+                    SUM(s.gpa * s.total_credits) / NULLIF(SUM(s.total_credits), 0) as cgpa
+                FROM student_semester_gpa s
+                JOIN users u ON s.user_id = u.id
+                JOIN user_details ud ON ud.user_id = u.id
+                WHERE CAST(ud.uni_year AS VARCHAR) = :uniYear
+                GROUP BY s.user_id
+            ) student_cgpa
         """,
         nativeQuery = true
     )
