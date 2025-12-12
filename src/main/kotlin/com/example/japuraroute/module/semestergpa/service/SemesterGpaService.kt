@@ -267,7 +267,7 @@ class SemesterGpaService(
             ?: throw IllegalArgumentException("User does not have a uni_year set")
 
         // Get total students in the batch
-        val batchUserDetails = userDetailsRepository.findByUni_year(uniYear)
+        val batchUserDetails = userDetailsRepository.findByUniYear(uniYear)
         val totalStudents = batchUserDetails.size
 
         if (totalStudents == 0) {
