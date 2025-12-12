@@ -42,7 +42,7 @@ interface SemesterGpaRepository : JpaRepository<SemesterGpaModel, UUID> {
                 COUNT(DISTINCT s.user_id) as student_count,
                 COALESCE(SUM(s.gpa * s.total_credits), 0) as weighted_gpa_sum,
                 COALESCE(SUM(s.total_credits), 0) as total_credits_sum
-            FROM semester_gpa s
+            FROM student_semester_gpa s
             JOIN users u ON s.user_id = u.id
             JOIN user_details ud ON ud.user_id = u.id
             WHERE ud.uni_year = :uniYear
