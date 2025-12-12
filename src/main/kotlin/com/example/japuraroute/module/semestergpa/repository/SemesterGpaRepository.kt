@@ -4,6 +4,8 @@ import com.example.japuraroute.module.module.model.SEMETSER_ID
 import com.example.japuraroute.module.semestergpa.model.SemesterGpaModel
 import com.example.japuraroute.module.user.model.User
 import org.springframework.data.jpa.repository.JpaRepository
+import org.springframework.data.jpa.repository.Query
+import org.springframework.data.repository.query.Param
 import org.springframework.stereotype.Repository
 import java.util.UUID
 
@@ -27,5 +29,23 @@ interface SemesterGpaRepository : JpaRepository<SemesterGpaModel, UUID> {
     
     // Delete all semester GPAs for a user
     fun deleteByUser(user: User)
+
+    // OPTIMIZED: Find all semester GPAs for multiple users in ONE query
+    @Query("SELECT s FROM SemesterGpaModel s WHERE s.user.id IN :userIds")
+    fun findByUserIdIn(@Param("userIds") userIds: List<UUID>): List<SemesterGpaModel>
+
+    // ULTRA-OPTIMIZED: Calculate batch average GPA statistics in a single database query
+    // Returns: [studentCount, weightedGpaSum, totalCreditsSum]
+    @Query("""
+        SELECT 
+            COUNT(DISTINCT s.user.id),
+            COALESCE(SUM(s.gpa * s.totalCredits), 0),
+            COALESCE(SUM(s.totalCredits), 0)
+        FROM SemesterGpaModel s
+        JOIN s.user u
+        JOIN UserDetails ud ON ud.user.id = u.id
+        WHERE ud.uni_year = :uniYear
+    """)
+    fun calculateBatchStatistics(@Param("uniYear") uniYear: String): Array<Any>
 }
 

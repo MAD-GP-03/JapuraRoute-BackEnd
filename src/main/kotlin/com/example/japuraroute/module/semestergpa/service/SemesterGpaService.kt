@@ -5,6 +5,7 @@ import com.example.japuraroute.module.semestergpa.dto.*
 import com.example.japuraroute.module.semestergpa.model.SemesterGpaModel
 import com.example.japuraroute.module.semestergpa.repository.SemesterGpaRepository
 import com.example.japuraroute.module.user.repository.UserRepository
+import com.example.japuraroute.module.user.repository.UserDetailsRepository
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.util.UUID
@@ -12,7 +13,8 @@ import java.util.UUID
 @Service
 class SemesterGpaService(
     private val semesterGpaRepository: SemesterGpaRepository,
-    private val userRepository: UserRepository
+    private val userRepository: UserRepository,
+    private val userDetailsRepository: UserDetailsRepository
 ) {
 
     // Grade to Grade Point mapping
@@ -247,6 +249,61 @@ class SemesterGpaService(
             gpa = semesterGpa.gpa,
             createdAt = semesterGpa.createdAt?.toString(),
             updatedAt = semesterGpa.updatedAt?.toString()
+        )
+    }
+
+    /**
+     * Calculate batch average GPA based on user's uni year
+     * Gets all students in the same uni_year and calculates their average overall CGPA
+     * ULTRA-OPTIMIZED: Uses single database query with aggregation to calculate all statistics
+     * Performance: O(1) - constant 2 queries regardless of batch size
+     */
+    fun calculateBatchAverageGpa(userId: UUID): BatchAverageGpaResponseDTO {
+        // Find user's details to get their uni_year
+        val userDetails = userDetailsRepository.findByUserId(userId)
+            ?: throw NoSuchElementException("User details not found for user id: $userId")
+
+        val uniYear = userDetails.uni_year
+            ?: throw IllegalArgumentException("User does not have a uni_year set")
+
+        // Get total students in the batch
+        val batchUserDetails = userDetailsRepository.findByUni_year(uniYear)
+        val totalStudents = batchUserDetails.size
+
+        if (totalStudents == 0) {
+            return BatchAverageGpaResponseDTO(
+                uniYear = uniYear.name,
+                totalStudents = 0,
+                studentsWithGpa = 0,
+                averageGpa = 0.0f,
+                studentsWithoutGpa = 0
+            )
+        }
+
+        // ULTRA-OPTIMIZED: Calculate all statistics in ONE database query
+        // Returns: [studentCount, weightedGpaSum, totalCreditsSum]
+        val statistics = semesterGpaRepository.calculateBatchStatistics(uniYear.name)
+
+        val studentsWithGpa = (statistics[0] as Long).toInt()
+        val weightedGpaSum = (statistics[1] as? Number)?.toDouble() ?: 0.0
+        val totalCreditsSum = (statistics[2] as? Number)?.toDouble() ?: 0.0
+
+        // Calculate batch average GPA: Sum(student_cgpa) / student_count
+        // Where student_cgpa = Sum(semester_gpa * semester_credits) / Sum(semester_credits)
+        val averageGpa = if (totalCreditsSum > 0.0) {
+            (weightedGpaSum / totalCreditsSum).toFloat()
+        } else {
+            0.0f
+        }
+
+        val studentsWithoutGpa = totalStudents - studentsWithGpa
+
+        return BatchAverageGpaResponseDTO(
+            uniYear = uniYear.name,
+            totalStudents = totalStudents,
+            studentsWithGpa = studentsWithGpa,
+            averageGpa = averageGpa,
+            studentsWithoutGpa = studentsWithoutGpa
         )
     }
 }

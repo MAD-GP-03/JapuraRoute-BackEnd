@@ -205,6 +205,38 @@ class AdminSemesterGpaController(
             )
         }
     }
+
+    @GetMapping("/batch-average/user/{userId}")
+    @Operation(summary = "Get batch average GPA for a user's batch (Admin)")
+    fun getBatchAverageGpaForUser(
+        @PathVariable userId: UUID
+    ): ResponseEntity<ApiResponse<BatchAverageGpaResponseDTO>> {
+        return try {
+            val batchAverage = semesterGpaService.calculateBatchAverageGpa(userId)
+
+            ResponseEntity.ok(
+                ApiResponse(
+                    status = true,
+                    message = "Batch average GPA calculated successfully for ${batchAverage.uniYear}",
+                    data = batchAverage
+                )
+            )
+        } catch (e: NoSuchElementException) {
+            ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+                ApiResponse(
+                    status = false,
+                    message = e.message
+                )
+            )
+        } catch (e: IllegalArgumentException) {
+            ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                ApiResponse(
+                    status = false,
+                    message = e.message
+                )
+            )
+        }
+    }
 }
 
 @RestController
@@ -386,6 +418,41 @@ class StudentSemesterGpaController(
             )
         } catch (e: NoSuchElementException) {
             ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+                ApiResponse(
+                    status = false,
+                    message = e.message
+                )
+            )
+        }
+    }
+
+    @GetMapping("/batch-average")
+    @Operation(summary = "Get average GPA of my batch (same uni year)")
+    fun getBatchAverageGpa(
+        @AuthenticationPrincipal userDetails: UserDetails
+    ): ResponseEntity<ApiResponse<BatchAverageGpaResponseDTO>> {
+        return try {
+            val user = userRepository.findByEmail(userDetails.username)
+                ?: throw NoSuchElementException("User not found")
+
+            val batchAverage = semesterGpaService.calculateBatchAverageGpa(user.id!!)
+
+            ResponseEntity.ok(
+                ApiResponse(
+                    status = true,
+                    message = "Batch average GPA calculated successfully for ${batchAverage.uniYear}",
+                    data = batchAverage
+                )
+            )
+        } catch (e: NoSuchElementException) {
+            ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+                ApiResponse(
+                    status = false,
+                    message = e.message
+                )
+            )
+        } catch (e: IllegalArgumentException) {
+            ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
                 ApiResponse(
                     status = false,
                     message = e.message

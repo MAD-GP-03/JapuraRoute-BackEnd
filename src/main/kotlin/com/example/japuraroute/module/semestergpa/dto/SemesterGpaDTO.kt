@@ -62,3 +62,12 @@ data class SubjectResponseDTO(
     val gradePoints: Float
 )
 
+// Response DTO for batch average GPA
+data class BatchAverageGpaResponseDTO(
+    val uniYear: String,
+    val totalStudents: Int,
+    val studentsWithGpa: Int,
+    val averageGpa: Float,
+    val studentsWithoutGpa: Int
+)
+
