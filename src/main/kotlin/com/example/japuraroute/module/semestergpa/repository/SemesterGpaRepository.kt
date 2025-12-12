@@ -36,7 +36,7 @@ interface SemesterGpaRepository : JpaRepository<SemesterGpaModel, UUID> {
     fun findByUserIdIn(@Param("userIds") userIds: List<UUID>): List<SemesterGpaModel>
 
     // ULTRA-OPTIMIZED: Calculate batch average GPA statistics in a single database query
-    // Returns: [studentCount, weightedGpaSum, totalCreditsSum]
+    // Returns: List containing [studentCount, weightedGpaSum, totalCreditsSum]
     @Query("""
         SELECT 
             COUNT(DISTINCT s.user.id),
@@ -47,6 +47,6 @@ interface SemesterGpaRepository : JpaRepository<SemesterGpaModel, UUID> {
         JOIN UserDetails ud ON ud.user = u
         WHERE ud.uni_year = :uniYear
     """)
-    fun calculateBatchStatistics(@Param("uniYear") uniYear: UniYear): Array<Any>
+    fun calculateBatchStatistics(@Param("uniYear") uniYear: UniYear): List<Any>?
 }
 

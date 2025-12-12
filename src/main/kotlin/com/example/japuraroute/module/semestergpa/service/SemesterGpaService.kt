@@ -281,12 +281,34 @@ class SemesterGpaService(
         }
 
         // ULTRA-OPTIMIZED: Calculate all statistics in ONE database query
-        // Returns: [studentCount, weightedGpaSum, totalCreditsSum]
+        // Returns: List containing [studentCount, weightedGpaSum, totalCreditsSum]
         val statistics = semesterGpaRepository.calculateBatchStatistics(uniYear)
 
-        val studentsWithGpa = (statistics[0] as Long).toInt()
-        val weightedGpaSum = (statistics[1] as? Number)?.toDouble() ?: 0.0
-        val totalCreditsSum = (statistics[2] as? Number)?.toDouble() ?: 0.0
+        if (statistics == null || statistics.isEmpty()) {
+            return BatchAverageGpaResponseDTO(
+                uniYear = uniYear.name,
+                totalStudents = totalStudents,
+                studentsWithGpa = 0,
+                averageGpa = 0.0f,
+                studentsWithoutGpa = totalStudents
+            )
+        }
+
+        // Safely extract values from the query result
+        val studentsWithGpa = when (val count = statistics[0]) {
+            is Number -> count.toInt()
+            else -> 0
+        }
+
+        val weightedGpaSum = when (val sum = statistics[1]) {
+            is Number -> sum.toDouble()
+            else -> 0.0
+        }
+
+        val totalCreditsSum = when (val credits = statistics[2]) {
+            is Number -> credits.toDouble()
+            else -> 0.0
+        }
 
         // Calculate batch average GPA: Sum(student_cgpa) / student_count
         // Where student_cgpa = Sum(semester_gpa * semester_credits) / Sum(semester_credits)
