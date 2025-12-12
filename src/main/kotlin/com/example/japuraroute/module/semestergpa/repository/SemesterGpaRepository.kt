@@ -3,7 +3,6 @@ package com.example.japuraroute.module.semestergpa.repository
 import com.example.japuraroute.module.module.model.SEMETSER_ID
 import com.example.japuraroute.module.semestergpa.model.SemesterGpaModel
 import com.example.japuraroute.module.user.model.User
-import com.example.japuraroute.module.user.model.UniYear
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.query.Param
@@ -36,17 +35,20 @@ interface SemesterGpaRepository : JpaRepository<SemesterGpaModel, UUID> {
     fun findByUserIdIn(@Param("userIds") userIds: List<UUID>): List<SemesterGpaModel>
 
     // ULTRA-OPTIMIZED: Calculate batch average GPA statistics in a single database query
-    // Returns: List containing [studentCount, weightedGpaSum, totalCreditsSum]
-    @Query("""
-        SELECT 
-            COUNT(DISTINCT s.user.id),
-            COALESCE(SUM(s.gpa * s.totalCredits), 0),
-            COALESCE(SUM(s.totalCredits), 0)
-        FROM SemesterGpaModel s
-        JOIN s.user u
-        JOIN UserDetails ud ON ud.user = u
-        WHERE ud.uni_year = :uniYear
-    """)
-    fun calculateBatchStatistics(@Param("uniYear") uniYear: UniYear): List<Any>?
+    // Using native query for better control over result mapping
+    @Query(
+        value = """
+            SELECT 
+                COUNT(DISTINCT s.user_id) as student_count,
+                COALESCE(SUM(s.gpa * s.total_credits), 0) as weighted_gpa_sum,
+                COALESCE(SUM(s.total_credits), 0) as total_credits_sum
+            FROM semester_gpa s
+            JOIN users u ON s.user_id = u.id
+            JOIN user_details ud ON ud.user_id = u.id
+            WHERE ud.uni_year = :uniYear
+        """,
+        nativeQuery = true
+    )
+    fun calculateBatchStatistics(@Param("uniYear") uniYear: String): List<Any>?
 }
 

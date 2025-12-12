@@ -281,10 +281,43 @@ class SemesterGpaService(
         }
 
         // ULTRA-OPTIMIZED: Calculate all statistics in ONE database query
-        // Returns: List containing [studentCount, weightedGpaSum, totalCreditsSum]
-        val statistics = semesterGpaRepository.calculateBatchStatistics(uniYear)
+        // Native query returns List with one element containing Object[] with [count, weightedSum, totalCredits]
+        val queryResult = semesterGpaRepository.calculateBatchStatistics(uniYear.name)
 
-        if (statistics == null || statistics.isEmpty()) {
+        if (queryResult == null || queryResult.isEmpty()) {
+            return BatchAverageGpaResponseDTO(
+                uniYear = uniYear.name,
+                totalStudents = totalStudents,
+                studentsWithGpa = 0,
+                averageGpa = 0.0f,
+                studentsWithoutGpa = totalStudents
+            )
+        }
+
+        // Debug logging
+        println("DEBUG: queryResult type: ${queryResult::class.simpleName}, size: ${queryResult.size}")
+        println("DEBUG: First element type: ${queryResult[0]::class.simpleName}")
+        if (queryResult[0] is Array<*>) {
+            println("DEBUG: Array contents: ${(queryResult[0] as Array<*>).contentToString()}")
+        } else {
+            println("DEBUG: First element: ${queryResult[0]}")
+        }
+
+        // Extract the Object[] from the list - native query returns List<Object[]>
+        val statistics = when (val firstElement = queryResult[0]) {
+            is Array<*> -> firstElement.toList()
+            else -> queryResult // fallback if not wrapped in array
+        }
+
+        // Debug logging for statistics
+        println("DEBUG: statistics type: ${statistics::class.simpleName}, size: ${statistics.size}")
+        statistics.forEachIndexed { index, value ->
+            println("DEBUG: statistics[$index] = $value (${value?.let { it::class.simpleName } ?: "null"})")
+        }
+
+        // Ensure we have at least 3 elements
+        if (statistics.size < 3) {
+            println("ERROR: Expected 3 values but got ${statistics.size}. Query might have failed or returned unexpected format.")
             return BatchAverageGpaResponseDTO(
                 uniYear = uniYear.name,
                 totalStudents = totalStudents,
