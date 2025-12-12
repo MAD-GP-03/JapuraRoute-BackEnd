@@ -45,7 +45,7 @@ interface SemesterGpaRepository : JpaRepository<SemesterGpaModel, UUID> {
             FROM student_semester_gpa s
             JOIN users u ON s.user_id = u.id
             JOIN user_details ud ON ud.user_id = u.id
-            WHERE ud.uni_year = :uniYear
+            WHERE CAST(ud.uni_year AS VARCHAR) = :uniYear
         """,
         nativeQuery = true
     )
