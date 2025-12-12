@@ -282,7 +282,7 @@ class SemesterGpaService(
 
         // ULTRA-OPTIMIZED: Calculate all statistics in ONE database query
         // Returns: [studentCount, weightedGpaSum, totalCreditsSum]
-        val statistics = semesterGpaRepository.calculateBatchStatistics(uniYear.name)
+        val statistics = semesterGpaRepository.calculateBatchStatistics(uniYear)
 
         val studentsWithGpa = (statistics[0] as Long).toInt()
         val weightedGpaSum = (statistics[1] as? Number)?.toDouble() ?: 0.0

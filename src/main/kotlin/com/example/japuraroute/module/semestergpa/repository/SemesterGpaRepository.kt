@@ -3,6 +3,7 @@ package com.example.japuraroute.module.semestergpa.repository
 import com.example.japuraroute.module.module.model.SEMETSER_ID
 import com.example.japuraroute.module.semestergpa.model.SemesterGpaModel
 import com.example.japuraroute.module.user.model.User
+import com.example.japuraroute.module.user.model.UniYear
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.query.Param
@@ -43,9 +44,9 @@ interface SemesterGpaRepository : JpaRepository<SemesterGpaModel, UUID> {
             COALESCE(SUM(s.totalCredits), 0)
         FROM SemesterGpaModel s
         JOIN s.user u
-        JOIN UserDetails ud ON ud.user.id = u.id
+        JOIN UserDetails ud ON ud.user = u
         WHERE ud.uni_year = :uniYear
     """)
-    fun calculateBatchStatistics(@Param("uniYear") uniYear: String): Array<Any>
+    fun calculateBatchStatistics(@Param("uniYear") uniYear: UniYear): Array<Any>
 }
 
