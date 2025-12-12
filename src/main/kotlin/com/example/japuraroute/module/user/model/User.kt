@@ -47,6 +47,9 @@ class User(
     @OneToOne(mappedBy = "user", cascade = [CascadeType.ALL], fetch = FetchType.LAZY)
     var details: UserDetails? = null
 
+    @OneToMany(mappedBy = "user", cascade = [CascadeType.ALL], fetch = FetchType.LAZY, orphanRemoval = true)
+    var semesterGpas: MutableList<com.example.japuraroute.module.semestergpa.model.SemesterGpaModel> = mutableListOf()
+
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
