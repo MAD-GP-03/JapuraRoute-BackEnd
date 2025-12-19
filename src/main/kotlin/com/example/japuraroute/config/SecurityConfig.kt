@@ -27,8 +27,7 @@ import com.example.japuraroute.common.util.JwtAuthenticationEntryPoint
 @EnableWebSecurity
 @EnableMethodSecurity(prePostEnabled = true)
 class SecurityConfig(
-    private val userRepository: UserRepository,
-    private val jwtAuthenticationEntryPoint: JwtAuthenticationEntryPoint
+    private val userRepository: UserRepository
 ) {
 
     @Bean
@@ -70,7 +69,8 @@ class SecurityConfig(
     fun securityFilterChain(
         http: HttpSecurity,
         @Lazy jwtAuthFilter: JwtAuthenticationFilter,
-        authProvider: AuthenticationProvider
+        authProvider: AuthenticationProvider,
+        @Lazy jwtAuthenticationEntryPoint: JwtAuthenticationEntryPoint
     ): SecurityFilterChain {
         http
             .csrf { it.disable() }
