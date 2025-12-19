@@ -21,12 +21,14 @@ import org.springframework.security.web.SecurityFilterChain
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
+import com.example.japuraroute.common.util.JwtAuthenticationEntryPoint
 
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity(prePostEnabled = true)
 class SecurityConfig(
-    private val userRepository: UserRepository
+    private val userRepository: UserRepository,
+    private val jwtAuthenticationEntryPoint: JwtAuthenticationEntryPoint
 ) {
 
     @Bean
@@ -93,6 +95,10 @@ class SecurityConfig(
                         "/webjars/**"
                     ).permitAll()
                     .anyRequest().authenticated() // Block everything else
+            }
+            .exceptionHandling { exceptions ->
+
+                exceptions.authenticationEntryPoint(jwtAuthenticationEntryPoint)
             }
             .sessionManagement {
                 // CRITICAL: Stateless session for JWT
