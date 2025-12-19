@@ -77,6 +77,12 @@ jobs:
             DB_USER=${{ secrets.DB_USER }}
             DB_PASS=${{ secrets.DB_PASS }}
             JWT_SECRET=${{ secrets.JWT_SECRET }}
+            ENDPOINT_URL=${{ secrets.ENDPOINT_URL }}
+            AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}
+            AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}
+            BUCKET_NAME=${{ secrets.BUCKET_NAME }}
+            REGION=${{ secrets.REGION }}
+            BASE_URL=${{ secrets.BASE_URL }}
             SPRING_PROFILES_ACTIVE=prod
             EOF
             chmod 600 .env
