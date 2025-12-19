@@ -21,6 +21,8 @@ repositories {
 }
 
 dependencies {
+    implementation("software.amazon.awssdk:s3:2.20.26")
+    implementation("software.amazon.awssdk:auth:2.20.26")
     implementation("org.postgresql:postgresql:42.7.3")
     implementation("io.github.cdimascio:dotenv-java:3.2.0")
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")

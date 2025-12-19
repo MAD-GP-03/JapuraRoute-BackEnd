@@ -57,3 +57,12 @@ management:
     health:
       show-details: when-authorized
 
+do:
+  space:
+    endpoint : ${ENDPOINT_URL}
+    access-key : ${AWS_ACCESS_KEY_ID}
+    secret-key : ${AWS_SECRET_ACCESS_KEY}
+    bucket-name : ${BUCKET_NAME}
+    region : ${REGION}
+    base-url : ${BASE_URL}
+
