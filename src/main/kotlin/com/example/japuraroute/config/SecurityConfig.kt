@@ -22,6 +22,9 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import com.example.japuraroute.common.util.JwtAuthenticationEntryPoint
+import org.springframework.web.cors.CorsConfiguration
+import org.springframework.web.cors.CorsConfigurationSource
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource
 
 @Configuration
 @EnableWebSecurity
@@ -65,6 +68,25 @@ class SecurityConfig(
     @Bean
     fun passwordEncoder(): PasswordEncoder = BCryptPasswordEncoder()
 
+
+    @Bean
+    fun corsConfigurationSource(): CorsConfigurationSource {
+
+        val corsConfig = CorsConfiguration().apply {
+            addAllowedOrigin("http://localhost:5173")
+            addAllowedOrigin("http://127.0.0.1:5173")
+            addAllowedHeader("*")
+            allowedMethods = listOf("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS")
+            allowCredentials = true
+            maxAge = 3600L
+        }
+
+        val source = UrlBasedCorsConfigurationSource()
+        source.registerCorsConfiguration("/**", corsConfig)
+        return source
+
+    }
+
     @Bean
     fun securityFilterChain(
         http: HttpSecurity,
@@ -74,6 +96,7 @@ class SecurityConfig(
     ): SecurityFilterChain {
         http
             .csrf { it.disable() }
+            .cors { it.configurationSource(corsConfigurationSource()) }
             .authorizeHttpRequests { auth ->
                 auth
                     .requestMatchers("/api/auth/**").permitAll() // Open for Login/Register
