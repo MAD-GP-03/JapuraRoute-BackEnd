@@ -9,6 +9,7 @@ import org.springframework.data.domain.Pageable
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.time.LocalTime
 import java.util.*
 
 @Service
@@ -175,15 +176,15 @@ class PlaceService(private val placeRepository: PlaceRepository) {
     // Extension functions for mapping
     private fun OperatingHour.toDto() = OperatingHourDto(
         day = day,
-        startTime = startTime,
-        endTime = endTime,
+        startTime = startTime?.toString(),
+        endTime = endTime?.toString(),
         note = note
     )
 
     private fun OperatingHourDto.toEntity() = OperatingHour(
         day = day,
-        startTime = startTime,
-        endTime = endTime,
+        startTime = startTime?.let { LocalTime.parse(it) },
+        endTime = endTime?.let { LocalTime.parse(it) },
         note = note
     )
 }

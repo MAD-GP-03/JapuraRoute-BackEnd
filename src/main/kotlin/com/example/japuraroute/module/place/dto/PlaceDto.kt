@@ -3,7 +3,6 @@ package com.example.japuraroute.module.place.dto
 import com.fasterxml.jackson.annotation.JsonFormat
 import jakarta.validation.Valid
 import jakarta.validation.constraints.*
-import java.time.LocalTime
 
 data class CreatePlaceDto(
     @field:NotBlank(message = "Name is required")
@@ -129,10 +128,10 @@ data class OperatingHourDto(
     val day: String,
 
     @JsonFormat(pattern = "HH:mm:ss")
-    val startTime: LocalTime? = null,
+    val startTime: String? = null,
 
     @JsonFormat(pattern = "HH:mm:ss")
-    val endTime: LocalTime? = null,
+    val endTime: String? = null,
 
     @field:Size(max = 200, message = "Note must not exceed 200 characters")
     val note: String? = null
