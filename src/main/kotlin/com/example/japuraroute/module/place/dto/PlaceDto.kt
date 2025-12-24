@@ -1,5 +1,6 @@
 package com.example.japuraroute.module.place.dto
 
+import com.fasterxml.jackson.annotation.JsonFormat
 import jakarta.validation.Valid
 import jakarta.validation.constraints.*
 import java.time.LocalTime
@@ -48,7 +49,7 @@ data class CreatePlaceDto(
 
     @field:Valid
     @field:Size(max = 7, message = "Maximum 7 operating hours (one per day)")
-    val operatingHours: List<OperatingHourDto> = emptyList()
+    val operatingHours: List<OperatingHourDto>? = null
 )
 
 data class UpdatePlaceDto(
@@ -127,19 +128,15 @@ data class OperatingHourDto(
     )
     val day: String,
 
+    @JsonFormat(pattern = "HH:mm:ss")
     val startTime: LocalTime? = null,
 
+    @JsonFormat(pattern = "HH:mm:ss")
     val endTime: LocalTime? = null,
 
     @field:Size(max = 200, message = "Note must not exceed 200 characters")
     val note: String? = null
-) {
-    init {
-        if (startTime != null && endTime != null && startTime.isAfter(endTime)) {
-            throw IllegalArgumentException("Start time must be before end time")
-        }
-    }
-}
+)
 
 data class PlaceSearchCriteria(
     @field:Size(max = 200, message = "Name search must not exceed 200 characters")

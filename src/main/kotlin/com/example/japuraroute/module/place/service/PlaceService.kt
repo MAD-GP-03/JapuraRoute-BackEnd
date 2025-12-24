@@ -32,7 +32,7 @@ class PlaceService(private val placeRepository: PlaceRepository) {
             contactPhone = dto.contactPhone,
             websiteUrl = dto.websiteUrl,
             images = dto.images.toMutableList(),
-            operatingHours = dto.operatingHours.map { it.toEntity() }.toMutableList()
+            operatingHours = dto.operatingHours?.map { it.toEntity() }?.toMutableList() ?: mutableListOf()
         )
         return placeRepository.save(place)
     }
