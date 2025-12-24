@@ -28,13 +28,14 @@ interface PlaceRepository : JpaRepository<Place, UUID> {
         WHERE (:name IS NULL OR LOWER(p.name) LIKE LOWER(CONCAT('%', :name, '%')))
         AND (:location IS NULL OR LOWER(p.location) LIKE LOWER(CONCAT('%', :location, '%')))
         AND (:minRating IS NULL OR p.rating >= :minRating)
-        AND (:tags IS NULL OR SIZE(:tags) = 0 OR t IN :tags)
+        AND (:tags IS NULL OR :tagsSize = 0 OR t IN (:tags))
     """)
     fun searchPlaces(
         @Param("name") name: String?,
         @Param("location") location: String?,
         @Param("minRating") minRating: Double?,
         @Param("tags") tags: List<String>?,
+        @Param("tagsSize") tagsSize: Int,
         pageable: Pageable
     ): Page<Place>
 

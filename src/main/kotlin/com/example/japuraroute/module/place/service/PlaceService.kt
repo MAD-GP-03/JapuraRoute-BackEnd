@@ -82,11 +82,13 @@ class PlaceService(private val placeRepository: PlaceRepository) {
     }
 
     fun searchPlaces(criteria: PlaceSearchCriteria, pageable: Pageable): Page<Place> {
+        val tags = criteria.tags?.takeIf { it.isNotEmpty() }
         return placeRepository.searchPlaces(
             name = criteria.name,
             location = criteria.location,
             minRating = criteria.minRating,
-            tags = criteria.tags?.takeIf { it.isNotEmpty() },
+            tags = tags,
+            tagsSize = tags?.size ?: 0,
             pageable = pageable
         )
     }
