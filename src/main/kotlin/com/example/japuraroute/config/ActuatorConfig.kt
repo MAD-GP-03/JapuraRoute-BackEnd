@@ -4,7 +4,7 @@ import org.springframework.context.annotation.Configuration
 
 /**
  * Actuator Configuration
- * Spring Boot automatically provides database health indicators
+ * Spring Boot automatically provides database health indicatorss
  * Access at: /actuator/health
  */
 @Configuration
