@@ -1,8 +1,6 @@
 package com.example.japuraroute.module.place.repository
 
 import com.example.japuraroute.module.place.model.Place
-import org.springframework.data.domain.Page
-import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.query.Param
@@ -12,15 +10,15 @@ import java.util.*
 @Repository
 interface PlaceRepository : JpaRepository<Place, UUID> {
 
-    fun findByNameContainingIgnoreCase(name: String, pageable: Pageable): Page<Place>
+    fun findByNameContainingIgnoreCase(name: String): List<Place>
 
-    fun findByLocationContainingIgnoreCase(location: String, pageable: Pageable): Page<Place>
+    fun findByLocationContainingIgnoreCase(location: String): List<Place>
 
     @Query("SELECT p FROM Place p JOIN p.tags t WHERE LOWER(t) = LOWER(:tag)")
-    fun findByTag(@Param("tag") tag: String, pageable: Pageable): Page<Place>
+    fun findByTag(@Param("tag") tag: String): List<Place>
 
     @Query("SELECT p FROM Place p WHERE p.rating >= :minRating")
-    fun findByMinRating(@Param("minRating") minRating: Double, pageable: Pageable): Page<Place>
+    fun findByMinRating(@Param("minRating") minRating: Double): List<Place>
 
     @Query("""
         SELECT DISTINCT p FROM Place p
@@ -35,9 +33,8 @@ interface PlaceRepository : JpaRepository<Place, UUID> {
         @Param("location") location: String?,
         @Param("minRating") minRating: Double?,
         @Param("tags") tags: List<String>?,
-        @Param("tagsSize") tagsSize: Int,
-        pageable: Pageable
-    ): Page<Place>
+        @Param("tagsSize") tagsSize: Int
+    ): List<Place>
 
     fun existsByName(name: String): Boolean
 }

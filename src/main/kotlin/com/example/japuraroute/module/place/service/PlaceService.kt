@@ -4,8 +4,6 @@ import com.example.japuraroute.module.place.dto.*
 import com.example.japuraroute.module.place.model.OperatingHour
 import com.example.japuraroute.module.place.model.Place
 import com.example.japuraroute.module.place.repository.PlaceRepository
-import org.springframework.data.domain.Page
-import org.springframework.data.domain.Pageable
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -43,8 +41,8 @@ class PlaceService(private val placeRepository: PlaceRepository) {
             ?: throw NoSuchElementException("Place not found with id: $id")
     }
 
-    fun getAllPlaces(pageable: Pageable): Page<Place> {
-        return placeRepository.findAll(pageable)
+    fun getAllPlaces(): List<Place> {
+        return placeRepository.findAll()
     }
 
     @Transactional
@@ -82,32 +80,31 @@ class PlaceService(private val placeRepository: PlaceRepository) {
         placeRepository.deleteById(id)
     }
 
-    fun searchPlaces(criteria: PlaceSearchCriteria, pageable: Pageable): Page<Place> {
+    fun searchPlaces(criteria: PlaceSearchCriteria): List<Place> {
         val tags = criteria.tags?.takeIf { it.isNotEmpty() }
         return placeRepository.searchPlaces(
             name = criteria.name,
             location = criteria.location,
             minRating = criteria.minRating,
             tags = tags,
-            tagsSize = tags?.size ?: 0,
-            pageable = pageable
+            tagsSize = tags?.size ?: 0
         )
     }
 
-    fun searchByName(name: String, pageable: Pageable): Page<Place> {
-        return placeRepository.findByNameContainingIgnoreCase(name, pageable)
+    fun searchByName(name: String): List<Place> {
+        return placeRepository.findByNameContainingIgnoreCase(name)
     }
 
-    fun searchByLocation(location: String, pageable: Pageable): Page<Place> {
-        return placeRepository.findByLocationContainingIgnoreCase(location, pageable)
+    fun searchByLocation(location: String): List<Place> {
+        return placeRepository.findByLocationContainingIgnoreCase(location)
     }
 
-    fun searchByTag(tag: String, pageable: Pageable): Page<Place> {
-        return placeRepository.findByTag(tag, pageable)
+    fun searchByTag(tag: String): List<Place> {
+        return placeRepository.findByTag(tag)
     }
 
-    fun findByMinRating(minRating: Double, pageable: Pageable): Page<Place> {
-        return placeRepository.findByMinRating(minRating, pageable)
+    fun findByMinRating(minRating: Double): List<Place> {
+        return placeRepository.findByMinRating(minRating)
     }
 
     @Transactional

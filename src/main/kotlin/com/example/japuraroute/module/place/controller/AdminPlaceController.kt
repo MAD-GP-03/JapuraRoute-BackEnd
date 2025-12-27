@@ -7,9 +7,6 @@ import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.Valid
-import org.springframework.data.domain.Page
-import org.springframework.data.domain.Pageable
-import org.springframework.data.web.PageableDefault
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.prepost.PreAuthorize
@@ -50,11 +47,9 @@ class AdminPlaceController(
     }
 
     @GetMapping
-    @Operation(summary = "Get all places with pagination")
-    fun getAllPlaces(
-        @PageableDefault(size = 20, sort = ["name"]) pageable: Pageable
-    ): ResponseEntity<ApiResponse<Page<PlaceResponseDto>>> {
-        val places = placeService.getAllPlaces(pageable).map { placeService.toResponseDto(it) }
+    @Operation(summary = "Get all places")
+    fun getAllPlaces(): ResponseEntity<ApiResponse<List<PlaceResponseDto>>> {
+        val places = placeService.getAllPlaces().map { placeService.toResponseDto(it) }
         return ResponseEntity.ok(
             ApiResponse(
                 status = true,
@@ -141,10 +136,9 @@ class AdminPlaceController(
     @PostMapping("/search")
     @Operation(summary = "Search places with advanced criteria")
     fun searchPlaces(
-        @Valid @RequestBody criteria: PlaceSearchCriteria,
-        @PageableDefault(size = 20) pageable: Pageable
-    ): ResponseEntity<ApiResponse<Page<PlaceResponseDto>>> {
-        val places = placeService.searchPlaces(criteria, pageable).map { placeService.toResponseDto(it) }
+        @Valid @RequestBody criteria: PlaceSearchCriteria
+    ): ResponseEntity<ApiResponse<List<PlaceResponseDto>>> {
+        val places = placeService.searchPlaces(criteria).map { placeService.toResponseDto(it) }
         return ResponseEntity.ok(
             ApiResponse(
                 status = true,

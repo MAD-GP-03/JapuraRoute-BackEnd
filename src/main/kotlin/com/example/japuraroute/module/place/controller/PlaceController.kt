@@ -9,9 +9,6 @@ import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.Valid
-import org.springframework.data.domain.Page
-import org.springframework.data.domain.Pageable
-import org.springframework.data.web.PageableDefault
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
@@ -26,11 +23,9 @@ class PlaceController(
 ) {
 
     @GetMapping
-    @Operation(summary = "Get all places with pagination")
-    fun getAllPlaces(
-        @PageableDefault(size = 20, sort = ["name"]) pageable: Pageable
-    ): ResponseEntity<ApiResponse<Page<PlaceResponseDto>>> {
-        val places = placeService.getAllPlaces(pageable).map { placeService.toResponseDto(it) }
+    @Operation(summary = "Get all places")
+    fun getAllPlaces(): ResponseEntity<ApiResponse<List<PlaceResponseDto>>> {
+        val places = placeService.getAllPlaces().map { placeService.toResponseDto(it) }
         return ResponseEntity.ok(
             ApiResponse(
                 status = true,
@@ -64,10 +59,9 @@ class PlaceController(
     @PostMapping("/search")
     @Operation(summary = "Search places with advanced criteria")
     fun searchPlaces(
-        @Valid @RequestBody criteria: PlaceSearchCriteria,
-        @PageableDefault(size = 20) pageable: Pageable
-    ): ResponseEntity<ApiResponse<Page<PlaceResponseDto>>> {
-        val places = placeService.searchPlaces(criteria, pageable).map { placeService.toResponseDto(it) }
+        @Valid @RequestBody criteria: PlaceSearchCriteria
+    ): ResponseEntity<ApiResponse<List<PlaceResponseDto>>> {
+        val places = placeService.searchPlaces(criteria).map { placeService.toResponseDto(it) }
         return ResponseEntity.ok(
             ApiResponse(
                 status = true,
@@ -80,10 +74,9 @@ class PlaceController(
     @GetMapping("/search/name")
     @Operation(summary = "Search places by name")
     fun searchByName(
-        @RequestParam name: String,
-        @PageableDefault(size = 20) pageable: Pageable
-    ): ResponseEntity<ApiResponse<Page<PlaceResponseDto>>> {
-        val places = placeService.searchByName(name, pageable).map { placeService.toResponseDto(it) }
+        @RequestParam name: String
+    ): ResponseEntity<ApiResponse<List<PlaceResponseDto>>> {
+        val places = placeService.searchByName(name).map { placeService.toResponseDto(it) }
         return ResponseEntity.ok(
             ApiResponse(
                 status = true,
@@ -96,10 +89,9 @@ class PlaceController(
     @GetMapping("/search/location")
     @Operation(summary = "Search places by location")
     fun searchByLocation(
-        @RequestParam location: String,
-        @PageableDefault(size = 20) pageable: Pageable
-    ): ResponseEntity<ApiResponse<Page<PlaceResponseDto>>> {
-        val places = placeService.searchByLocation(location, pageable).map { placeService.toResponseDto(it) }
+        @RequestParam location: String
+    ): ResponseEntity<ApiResponse<List<PlaceResponseDto>>> {
+        val places = placeService.searchByLocation(location).map { placeService.toResponseDto(it) }
         return ResponseEntity.ok(
             ApiResponse(
                 status = true,
@@ -112,10 +104,9 @@ class PlaceController(
     @GetMapping("/search/tag")
     @Operation(summary = "Search places by tag")
     fun searchByTag(
-        @RequestParam tag: String,
-        @PageableDefault(size = 20) pageable: Pageable
-    ): ResponseEntity<ApiResponse<Page<PlaceResponseDto>>> {
-        val places = placeService.searchByTag(tag, pageable).map { placeService.toResponseDto(it) }
+        @RequestParam tag: String
+    ): ResponseEntity<ApiResponse<List<PlaceResponseDto>>> {
+        val places = placeService.searchByTag(tag).map { placeService.toResponseDto(it) }
         return ResponseEntity.ok(
             ApiResponse(
                 status = true,
@@ -128,10 +119,9 @@ class PlaceController(
     @GetMapping("/search/rating")
     @Operation(summary = "Search places by minimum rating")
     fun searchByRating(
-        @RequestParam minRating: Double,
-        @PageableDefault(size = 20) pageable: Pageable
-    ): ResponseEntity<ApiResponse<Page<PlaceResponseDto>>> {
-        val places = placeService.findByMinRating(minRating, pageable).map { placeService.toResponseDto(it) }
+        @RequestParam minRating: Double
+    ): ResponseEntity<ApiResponse<List<PlaceResponseDto>>> {
+        val places = placeService.findByMinRating(minRating).map { placeService.toResponseDto(it) }
         return ResponseEntity.ok(
             ApiResponse(
                 status = true,
